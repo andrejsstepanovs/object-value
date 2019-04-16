@@ -1,0 +1,28 @@
+{
+    "name": "andrejsstepanovs/value-object",
+    "description": "Value object library",
+    "keywords": ["composer", "library"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrejs Stepanovs",
+            "email": "andrejsstepanovs@gmail.com"
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": ">=7.1",
+        "doctrine/collections": "^1.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "6.*",
+        "fzaninotto/faker": "^1.8",
+        "morrislaptop/var-dumper-with-context": "^0.3.0",
+        "symfony/var-dumper": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "ObjectValue\\": "src/"
+        }
+    }
+}
