@@ -1,6 +1,6 @@
 {
-    "name": "andrejsstepanovs/value-object",
-    "description": "Value object library",
+    "name": "andrejsstepanovs/object-value",
+    "description": "Object value library",
     "keywords": ["composer", "library"],
     "license": "MIT",
     "authors": [
