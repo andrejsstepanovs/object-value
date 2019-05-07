@@ -4,9 +4,8 @@ declare(strict_types = 1);
 
 namespace ObjectValue\Test;
 
-use ObjectValue\Object;
+use ObjectValue\Entity;
 use PHPUnit\Framework\TestCase;
-use Faker\Factory as FakerFactory;
 
 /**
  * Class ObjectTest
@@ -19,8 +18,8 @@ class ObjectTest extends TestCase
      */
     public function testSetterReturnSelf()
     {
-        $object = (new Object())->set('apple', 'green');
-        $this->assertInstanceOf(Object::class, $object);
+        $object = (new Entity())->set('apple', 'green');
+        $this->assertInstanceOf(Entity::class, $object);
     }
 
     /**
@@ -28,18 +27,16 @@ class ObjectTest extends TestCase
      */
     public function setterDataProvider(): array
     {
-        $faker = FakerFactory::create();
-
         return [
-            ['name', $faker->name],
-            ['time', $faker->time],
-            ['number', $faker->numerify()],
-            ['int', $faker->numberBetween()],
-            ['float', $faker->randomFloat()],
-            ['bank', $faker->bankAccountNumber],
-            ['words', $faker->words()],
-            ['text', $faker->text()],
-            ['datetime', $faker->dateTime],
+            ['name', 'Test name'],
+            ['time', time()],
+            ['number', '100,991'],
+            ['int', 12345670],
+            ['float', (float)12345.29],
+            ['bank', '00001111222233334444'],
+            ['words', 'Test small sentence'],
+            ['text', 'Minima ducimus dolore incidunt iusto dolorem. Saepe officiis saepe culpa sunt neque nobis.'],
+            ['datetime', new \DateTime()],
         ];
     }
 
@@ -50,7 +47,7 @@ class ObjectTest extends TestCase
      */
     public function testSetterAndGetterWithSimpleValues(string $name, $value)
     {
-        $response = (new Object())->set($name, $value)->get($name);
+        $response = (new Entity())->set($name, $value)->get($name);
         $this->assertEquals($value, $response);
     }
 
@@ -59,7 +56,7 @@ class ObjectTest extends TestCase
      */
     public function testRemoveExistingWIllDeletesKey()
     {
-        $object = (new Object())
+        $object = (new Entity())
             ->set('apple', 'green')
             ->set('banana', 'yellow')
         ;
@@ -78,7 +75,7 @@ class ObjectTest extends TestCase
      */
     public function testExists()
     {
-        $object = (new Object())
+        $object = (new Entity())
             ->set('kiwi', 'green')
             ->set('orange', 'orange')
         ;
@@ -93,7 +90,7 @@ class ObjectTest extends TestCase
      */
     public function testRemoveNotExistingWillThrowException()
     {
-        (new Object())->set('kiwi', 'green')->remove('banana');
+        (new Entity())->set('kiwi', 'green')->remove('banana');
     }
 
     /**
@@ -101,7 +98,7 @@ class ObjectTest extends TestCase
      */
     public function testGetNotExistingKeyWillThrowException()
     {
-        (new Object())->set('kiwi', 'green')->get('banana');
+        (new Entity())->set('kiwi', 'green')->get('banana');
     }
 
     /**
@@ -109,7 +106,7 @@ class ObjectTest extends TestCase
      */
     public function testArrayAccessSetterAndGetter()
     {
-        $object = (new Object())->set('apple', 'green');
+        $object = (new Entity())->set('apple', 'green');
         $object['banana'] = 'yellow';
 
         $this->assertEquals('green', $object['apple']);
@@ -121,7 +118,7 @@ class ObjectTest extends TestCase
      */
     public function testArrayAccessOffsetExists()
     {
-        $object = (new Object())->set('apple', 'green');
+        $object = (new Entity())->set('apple', 'green');
 
         $this->assertTrue(isset($object['apple']));
         $this->assertFalse(isset($object['banana']));
@@ -132,7 +129,7 @@ class ObjectTest extends TestCase
      */
     public function testArrayAccessOffsetUnset()
     {
-        $object = (new Object())->set('apple', 'green')->set('kiwi', 'green');
+        $object = (new Entity())->set('apple', 'green')->set('kiwi', 'green');
 
         unset($object['kiwi']);
 
@@ -145,7 +142,7 @@ class ObjectTest extends TestCase
      */
     public function testCountable()
     {
-        $object = (new Object());
+        $object = (new Entity());
         $this->assertEquals(0, $object->count());
         $this->assertEquals(0, count($object));
 
@@ -160,7 +157,7 @@ class ObjectTest extends TestCase
     public function testController()
     {
         $data = ['apple' => 'green', 'banana' => 'yellow'];
-        $object = (new Object($data));
+        $object = (new Entity($data));
 
         $this->assertEquals($object->getAll(), $data);
     }
@@ -170,7 +167,7 @@ class ObjectTest extends TestCase
      */
     public function testByDefaultObjectIsNotLocked()
     {
-        $this->assertFalse((new Object())->isLocked());
+        $this->assertFalse((new Entity())->isLockValues());
     }
 
     /**
@@ -178,45 +175,45 @@ class ObjectTest extends TestCase
      */
     public function testLockMakesObjectLocked()
     {
-        $object = (new Object());
+        $object = (new Entity());
         $object->set('apple', 'green');
-        $object->lock();
-        $this->assertTrue($object->isLocked());
+        $object->lockValues();
+        $this->assertTrue($object->isLockValues());
     }
 
     /**
      * Test locked object dont allow to set
-     * @expectedException \ObjectValue\Exceptions\LockedException
+     * @expectedException \ObjectValue\Exceptions\LockedValuesException
      */
     public function testLockedObjectNotAllowToSet()
     {
-        $object = (new Object());
+        $object = (new Entity());
         $object->set('apple', 'green');
-        $object->lock();
+        $object->lockValues();
         $object->set('banana', 'yellow');
     }
 
     /**
      * Test locked object dont allow to set
-     * @expectedException \ObjectValue\Exceptions\LockedException
+     * @expectedException \ObjectValue\Exceptions\LockedValuesException
      */
     public function testLockedObjectNotAllowToRemove()
     {
-        $object = (new Object());
+        $object = (new Entity());
         $object->set('apple', 'green');
-        $object->lock();
+        $object->lockValues();
         $object->remove('apple');
     }
 
     /**
      * Test locked object dont allow to set
-     * @expectedException \ObjectValue\Exceptions\LockedException
+     * @expectedException \ObjectValue\Exceptions\LockedValuesException
      */
     public function testLockedObjectNotAllowToUnset()
     {
-        $object = (new Object());
+        $object = (new Entity());
         $object->set('apple', 'green');
-        $object->lock();
+        $object->lockValues();
         unset($object['apple']);
     }
 
@@ -225,7 +222,7 @@ class ObjectTest extends TestCase
      */
     public function testIteratorMagic()
     {
-        $object = (new Object(['apple' => 'green']));
+        $object = (new Entity(['apple' => 'green']));
 
         foreach ($object as $name => $value) {
             $this->assertEquals('apple', $name);
@@ -238,7 +235,7 @@ class ObjectTest extends TestCase
      */
     public function testIteratorObject()
     {
-        $object = (new Object(['apple' => 'green', 'banana' => 'yellow']));
+        $object = (new Entity(['apple' => 'green', 'banana' => 'yellow']));
 
         $iterator = $object->getIterator();
 
@@ -252,5 +249,19 @@ class ObjectTest extends TestCase
 
         $iterator->rewind();
         $this->assertEquals('apple', $iterator->key());
+    }
+
+    /**
+     * Test toString returns full object name
+     */
+    public function testToString()
+    {
+        include_once 'MyTestEntity.php';
+        $object = new MyTestEntity();
+        $expected = MyTestEntity::class;
+
+        $this->assertEquals($expected, $object->__toString());
+        $this->assertEquals($expected, (string) $object);
+        $this->assertEquals($expected, strval($object));
     }
 }
